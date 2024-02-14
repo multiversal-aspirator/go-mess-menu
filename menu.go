@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -22,6 +24,8 @@ func isDay(s string) bool {
 
 func getmealitems(f *excelize.File, targetDay, targetMeal string) []string {
 	data, _ := f.GetRows("Sheet1")
+	targetDay = strings.ToUpper(targetDay)
+	targetMeal = strings.ToUpper(targetMeal)
 	var items []string
 	var dayindex int
 	var mealindexstart int
@@ -77,9 +81,9 @@ func getmealitemcount(f *excelize.File, targetDay, targetMeal string) int {
 }
 
 func itemchecker(f *excelize.File, targetDay, targetMeal, item string) bool {
-	//if item in getmealitems(f, targetDay, targetMeal) {
+	item = strings.ToUpper(item)
 	for _, searched := range getmealitems(f, targetDay, targetMeal) {
-		if item == searched {
+		if item == strings.ToUpper(searched) {
 			return true
 		}
 	}
@@ -124,8 +128,11 @@ func makejson(f *excelize.File) {
 	fmt.Print("JSON file created")
 }
 
-// Using the above data, create a struct that contains the day, date, meal and the items in that meal. Furthermore, create a method that prints the details of each meal instance
-// Create a method that prints the details of each meal instance
+/*
+	Using the above data, create a struct that contains the day, date, meal and the items in that meal.
+
+Furthermore, create a method that prints the details of each meal instance
+*/
 func (m Menu) printdetails() {
 	fmt.Printf("Day: %s, Date: %s, Meal: %s, Items: %v\n", m.Day, m.Date, m.Meal, m.Items)
 }
@@ -165,7 +172,10 @@ func main() {
 			fmt.Println("Enter the meal: ")
 			fmt.Scanln(&targetMeal)
 			fmt.Println("Enter the item: ")
-			fmt.Scanln(&item)
+			scanner := bufio.NewScanner(os.Stdin)
+			if scanner.Scan() {
+				item = scanner.Text()
+			}
 			ans := itemchecker(file, targetDay, targetMeal, item)
 			if ans {
 				fmt.Println("Item found")
